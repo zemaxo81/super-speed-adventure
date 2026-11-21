@@ -1061,7 +1061,7 @@ export class Level {
     }
     this.updateAmbient(playerZ, t);
     this.sky.position.z = playerZ;
-    this.sun.position.z = playerZ + 420;
+    this.sun.position.set(880, 300, playerZ + 320);
     if (this._standaloneBuilt === undefined) {
       this._standaloneBuilt = true;
       this._buildStandalone();
