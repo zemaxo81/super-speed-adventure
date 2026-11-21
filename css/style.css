@@ -390,3 +390,11 @@ body.no-cursor { cursor: none; }
 @media (orientation: portrait) and (max-width: 720px) {
   #controls-hint span::before { content: "↻ Tourne ton appareil ! "; color: var(--gold); }
 }
+
+.version-tag {
+  margin-top: 3vmin;
+  color: #7dff8a;
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+  opacity: 0.85;
+}
