@@ -384,22 +384,25 @@ export class Game {
 
   updateCamera(dt, snap) {
     const p = this.player.group.position;
-    const targetPos = new THREE.Vector3(0, p.y + 3.1, p.z - 8.4);
     if (snap) {
-      this.camera.position.copy(targetPos);
-      this._camLerp = 1;
+      this.camera.position.set(-10.5, p.y + 2.4, p.z + 1.2);
     } else {
-      const k = 1 - Math.pow(0.0007, dt);
-      this.camera.position.lerp(targetPos, k);
+      const k = 1 - Math.pow(0.004, dt);
+      this.camera.position.x += (-10.5 - this.camera.position.x) * Math.min(1, dt * 6);
+      this.camera.position.y += (p.y + 2.4 - this.camera.position.y) * k;
+      this.camera.position.z = p.z + 1.2;
     }
-    let eyeY = p.y + 1.5;
-    let lookZ = p.z + 6;
+    let eyeY = p.y + 1.3;
+    let lookZ = p.z + 6.5;
+    let lookX = 0;
     if (this.playerMode === "win") {
       const t = this.winTimer;
       eyeY = p.y + 2.4 + Math.sin(t * 1.4) * 0.8;
-      this.camera.position.set(Math.sin(t * 0.7) * 9, eyeY, p.z - Math.cos(t * 0.7) * 9);
+      this.camera.position.set(Math.sin(t * 0.7) * 10, eyeY, p.z - Math.cos(t * 0.7) * 10);
+      lookX = 0;
+      lookZ = p.z;
     }
-    const look = new THREE.Vector3(0, eyeY, lookZ);
+    const look = new THREE.Vector3(lookX, eyeY, lookZ);
     this.camera.lookAt(look);
     if (this.shake > 0 && this.save.settings.shake) {
       this.shake = Math.max(0, this.shake - dt * 2.4);
