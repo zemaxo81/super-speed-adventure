@@ -385,15 +385,15 @@ export class Game {
   updateCamera(dt, snap) {
     const p = this.player.group.position;
     if (snap) {
-      this.camera.position.set(-10.5, p.y + 2.4, p.z + 1.2);
+      this.camera.position.set(-8.0, p.y + 2.15, p.z + 1.0);
     } else {
       const k = 1 - Math.pow(0.004, dt);
-      this.camera.position.x += (-10.5 - this.camera.position.x) * Math.min(1, dt * 6);
-      this.camera.position.y += (p.y + 2.4 - this.camera.position.y) * k;
-      this.camera.position.z = p.z + 1.2;
+      this.camera.position.x += (-8.0 - this.camera.position.x) * Math.min(1, dt * 6);
+      this.camera.position.y += (p.y + 2.15 - this.camera.position.y) * k;
+      this.camera.position.z = p.z + 1.0;
     }
-    let eyeY = p.y + 1.3;
-    let lookZ = p.z + 6.5;
+    let eyeY = p.y + 1.15;
+    let lookZ = p.z + 5.5;
     let lookX = 0;
     if (this.playerMode === "win") {
       const t = this.winTimer;

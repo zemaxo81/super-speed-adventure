@@ -52,7 +52,7 @@ Chaque monde : palette, musique procédurale, obstacles et effets qui lui sont p
 - Chronomètre centième de seconde, **record personnel sauvegardé localement** (top 5 / monde)
 - Pièces à collecter (arcades au-dessus des trous), checkpoints, barre de progression
 - Difficulté progressive : vitesse et densité d'obstacles augmentent monde après monde
-- Obstacles : trous, précipices, plateformes mobiles, Pics, broyeurs, barres rotatives
+- Obstacles : trous, précipices, tuyaux verts à sauter (ou sur lesquels atterrir), plateformes mobiles, pics, broyeurs, barres rotatives
 - Redémarrage instantané d'un touche
 
 ## 🛠️ Technique

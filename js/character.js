@@ -24,6 +24,7 @@ export class Character {
     this.group.traverse((o) => {
       if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; }
     });
+    this.group.scale.setScalar(1.14);
   }
 
   _build() {
