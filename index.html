@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a1024">
+<title>Super Speed Adventure</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ffb300'/%3E%3Cpath d='M20 40l14-26-4 16 14-4-16 26 4-16z' fill='%23241a2e'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.js",
+    "three/addons/": "./vendor/three/addons/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+  <div id="vignette"></div>
+  <div id="fade"></div>
+
+  <div id="loading" class="screen active">
+    <div class="loading-inner">
+      <div class="logo-mini">⚡</div>
+      <h1 class="title">SUPER SPEED<br>ADVENTURE</h1>
+      <div class="loading-bar"><div id="loading-fill"></div></div>
+      <p id="loading-tip">Chargement du moteur…</p>
+    </div>
+  </div>
+
+  <div id="screen-home" class="screen">
+    <div class="home-wrap">
+      <h1 class="title big glitchable">SUPER SPEED<br><span>ADVENTURE</span></h1>
+      <p class="tagline">Course, saute, fonce vers la ligne d'arrivée !</p>
+      <div class="menu-col">
+        <button id="btn-play" class="btn btn-primary">▶&nbsp; JOUER</button>
+        <button id="btn-worlds" class="btn">MONDES</button>
+        <button id="btn-records" class="btn">RECORDS</button>
+        <button id="btn-settings" class="btn">PARAMÈTRES</button>
+      </div>
+      <button id="btn-fullscreen" class="btn-icon corner" title="Plein écran (F)">⛶</button>
+    </div>
+  </div>
+
+  <div id="screen-worlds" class="screen">
+    <div class="panel">
+      <h2>Choisis un monde</h2>
+      <div id="worlds-grid" class="worlds-grid"></div>
+      <button class="btn btn-back">← RETOUR</button>
+    </div>
+  </div>
+
+  <div id="screen-records" class="screen">
+    <div class="panel">
+      <h2>🏆 Records locaux</h2>
+      <div id="records-list"></div>
+      <button class="btn btn-back">← RETOUR</button>
+    </div>
+  </div>
+
+  <div id="screen-settings" class="screen">
+    <div class="panel">
+      <h2>Paramètres</h2>
+      <div class="setting-row">
+        <label for="sel-quality">Qualité graphique</label>
+        <select id="sel-quality">
+          <option value="low">Basse (mobile)</option>
+          <option value="medium">Moyenne</option>
+          <option value="high">Haute</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label for="rg-music">Musique</label>
+        <input type="range" id="rg-music" min="0" max="1" step="0.05">
+      </div>
+      <div class="setting-row">
+        <label for="rg-sfx">Effets sonores</label>
+        <input type="range" id="rg-sfx" min="0" max="1" step="0.05">
+      </div>
+      <div class="setting-row">
+        <label for="chk-shake">Vibrations caméra</label>
+        <input type="checkbox" id="chk-shake">
+      </div>
+      <button id="btn-fullscreen2" class="btn">⛶ PLEIN ÉCRAN</button>
+      <button class="btn btn-back">← RETOUR</button>
+    </div>
+  </div>
+
+  <div id="hud" class="hud hidden">
+    <div class="hud-top">
+      <div class="hud-box" id="hud-timer">0:00<span class="ms">.000</span></div>
+      <div class="hud-box" id="hud-coins">🪙 <span id="coins-count">0</span></div>
+      <div class="hud-box small" id="hud-best"></div>
+      <div class="hud-buttons">
+        <button id="btn-restart" class="btn-icon" title="Recommencer (R)">⟳</button>
+        <button id="btn-pause" class="btn-icon" title="Pause (Échap)">⏸</button>
+      </div>
+    </div>
+    <div class="progress-track"><div id="hud-progress-fill"></div><div id="hud-progress-dot"></div></div>
+  </div>
+
+  <button id="btn-jump" class="hidden">SAUTER</button>
+
+  <div id="screen-pause" class="screen">
+    <div class="panel small-panel">
+      <h2>Pause</h2>
+      <div class="menu-col">
+        <button id="btn-resume" class="btn btn-primary">▶&nbsp; REPRENDRE</button>
+        <button id="btn-restart2" class="btn">⟳ RECOMMENCER</button>
+        <button id="btn-home" class="btn">🏠 ACCUEIL</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="panel small-panel">
+      <h2 id="result-title">Niveau terminé !</h2>
+      <div id="result-stats"></div>
+      <div class="menu-col">
+        <button id="btn-retry" class="btn">⟳ REJOUER</button>
+        <button id="btn-next" class="btn btn-primary">MONDE SUIVANT ➜</button>
+        <button id="btn-home2" class="btn">🏠 ACCUEIL</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls-hint" class="hidden">
+    <span>ESPACE / Z / ↑ — Sauter&nbsp;&nbsp;•&nbsp;&nbsp;R — Recommencer&nbsp;&nbsp;•&nbsp;&nbsp;Échap — Pause</span>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
