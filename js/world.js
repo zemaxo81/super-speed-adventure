@@ -4,7 +4,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 export const WORLDS = [
   {
     id: "prairie", name: "Prairie Tropicale", icon: "🌴", length: 980,
-    sky: [0x2f8fff, 0xbfe9ff], fog: 0xcfe9ff, fogDensity: 0.0075,
+    sky: [0x5c94fc, 0x9cd7ff], fog: 0x8ec8ff, fogDensity: 0.0055,
     hemi: [0xbfe4ff, 0x3e7a34, 1.1], dir: [0xfff1cf, 2.6],
     water: { color: 0x1a8fd4, kind: "ocean" },
     top: "grass", side: "soil", deco: ["tree", "bush", "flower", "rock"],
@@ -70,12 +70,34 @@ function mulberry32(seed) {
 
 const texCache = {};
 
+const BLOCKY = new Set([
+  "grass", "soil", "rock", "rockdark", "basalt", "ice", "iceDark",
+  "sand", "sandstone", "metal", "metalSide", "lavaSurface",
+]);
+
+function drawBlockGrid(ctx, size) {
+  ctx.strokeStyle = "rgba(0,0,0,0.20)";
+  ctx.lineWidth = 2;
+  const step = size / 4;
+  for (let i = 0; i <= 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(step * i, 0);
+    ctx.lineTo(step * i, size);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, step * i);
+    ctx.lineTo(size, step * i);
+    ctx.stroke();
+  }
+}
+
 function canvasTex(key, size, draw, repeat) {
   if (texCache[key]) return texCache[key];
   const c = document.createElement("canvas");
   c.width = c.height = size;
   const ctx = c.getContext("2d");
   if (typeof draw === "function") draw(ctx, size);
+  if (BLOCKY.has(key)) drawBlockGrid(ctx, size);
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = THREE.SRGBColorSpace;
@@ -484,6 +506,7 @@ export class Level {
       w.push(["spinner", diff > 0.25 ? 0.09 : 0.03]);
       w.push(["spikeRow", 0.1]);
       w.push(["narrow", 0.07]);
+      w.push(["pipe", 0.12]);
       let total = 0;
       for (const item of w) total += item[1];
       let pick = rng() * total;
@@ -501,8 +524,16 @@ export class Level {
           z += len;
           break;
         }
+        case "pipe": {
+          const len = 10 + rng() * 6;
+          this.addPlatform(z, z + len, 6.5, top);
+          this._makePipe(z + len / 2, top, 1.45 + rng() * 0.95);
+          this._coinArc(z + len / 2 - 2.4, 4.6, top);
+          z += len;
+          break;
+        }
         case "gap": {
-          const g = 3 + diff * 2.6 + rng() * 1.6;
+          const g = 2.4 + diff * 1.8 + rng() * 1.2;
           const len = 9 + rng() * 8;
           z += g;
           this.addPlatform(z, z + len, 6.5, top);
@@ -511,7 +542,7 @@ export class Level {
           break;
         }
         case "gapCoins": {
-          const g = 4.5 + diff * 2.4 + rng() * 1.5;
+          const g = 3.4 + diff * 1.6 + rng() * 1.2;
           this._coinArc(z, g, top);
           z += g;
           this.addPlatform(z, z + 11, 6.5, top);
@@ -682,6 +713,23 @@ export class Level {
     this.spikes.push({ z, top, count, mesh: group });
   }
 
+  _makePipe(zc, groundTop, h) {
+    const bodyMat = mat(0x2fa84f, { rough: 0.3, metal: 0.15 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, h, 20), bodyMat);
+    body.position.set(0, groundTop + h / 2, zc);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    this.group.add(body);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.36, 20), bodyMat);
+    rim.position.set(0, groundTop + h - 0.18, zc);
+    rim.castShadow = true;
+    this.group.add(rim);
+    this.platforms.push({
+      mesh: rim, z0: zc - 0.78, z1: zc + 0.78, w: 1.56,
+      top: groundTop + h, x: 0, baseX: 0, mover: false,
+    });
+  }
+
   _makeFlag(z, top) {
     const group = new THREE.Group();
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 3.4, 8), mat(0xe8e8ef, { rough: 0.3, metal: 0.7 }));
@@ -839,8 +887,47 @@ export class Level {
     }
 
     if (d.id !== "city") this._buildIslands();
+    this._buildSideHills();
     if (d.id === "peaks" || d.id === "volcano" || d.id === "glacier" || d.id === "desert") this._buildDistantMountains();
     if (d.id !== "city" && d.id !== "volcano") this._buildClouds();
+  }
+
+  _buildSideHills() {
+    const rng = this.rng;
+    const d = this.def;
+    const hillColor = {
+      prairie: 0x2f9e44, peaks: 0x54765e, volcano: 0x4a2020,
+      glacier: 0xa8ccf0, desert: 0xd8a45a,
+    }[d.id] || 0x2f9e44;
+    const hillColor2 = {
+      prairie: 0x4db358, peaks: 0x6b8a75, volcano: 0x5c2c28,
+      glacier: 0xc4e2f8, desert: 0xe6bd78,
+    }[d.id] || 0x4db358;
+    for (let i = 0; i < 26; i++) {
+      const z = -40 + rng() * (this.length + 120);
+      const r = 7 + rng() * 16;
+      const side = rng() < 0.75 ? 1 : -1;
+      const x = side === 1 ? 15 + rng() * 55 : -(14 + rng() * 25);
+      const c1 = rng() < 0.55 ? hillColor : hillColor2;
+      const hill = new THREE.Mesh(
+        new THREE.SphereGeometry(r, 14, 10),
+        mat(c1, { rough: 1 })
+      );
+      hill.scale.y = 0.5 + rng() * 0.25;
+      hill.position.set(x, -3.5, z);
+      this.group.add(hill);
+    }
+    for (let i = 0; i < 14; i++) {
+      const z = -30 + rng() * (this.length + 90);
+      const c1 = rng() < 0.5 ? hillColor2 : hillColor;
+      const far = new THREE.Mesh(
+        new THREE.SphereGeometry(22 + rng() * 30, 14, 10),
+        mat(c1, { rough: 1 })
+      );
+      far.scale.y = 0.42;
+      far.position.set(70 + rng() * 90, -6, z);
+      this.group.add(far);
+    }
   }
 
   _buildIslands() {
