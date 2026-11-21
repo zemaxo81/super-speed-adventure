@@ -38,8 +38,8 @@ export class Character {
     this.body = new THREE.Group();
     this.group.add(this.body);
 
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.30, 0.42, 6, 12), furMat);
-    torso.position.y = 0.98;
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.31, 0.30, 6, 12), furMat);
+    torso.position.y = 0.94;
     this.body.add(torso);
 
     const belly = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), creamMat);
@@ -51,29 +51,29 @@ export class Character {
     this.neck.position.y = 1.28;
     this.body.add(this.neck);
 
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 18, 16), furMat);
-    head.scale.set(1, 0.95, 0.95);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 18, 16), furMat);
+    head.scale.set(1.12, 1.02, 1.02);
     this.head = head;
     this.neck.add(head);
 
-    const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), creamMat);
-    muzzle.scale.set(1, 0.8, 0.85);
-    muzzle.position.set(0, -0.06, 0.27);
+    const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 12), creamMat);
+    muzzle.scale.set(1, 0.78, 0.85);
+    muzzle.position.set(0, -0.08, 0.34);
     this.neck.add(muzzle);
 
-    const nose = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), blackMat);
-    nose.position.set(0, -0.02, 0.42);
+    const nose = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), blackMat);
+    nose.position.set(0, -0.04, 0.52);
     this.neck.add(nose);
 
     for (const side of [-1, 1]) {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 10), mat(0xffffff, 0.25));
-      eye.position.set(side * 0.13, 0.09, 0.27);
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.105, 10, 10), mat(0xffffff, 0.25));
+      eye.position.set(side * 0.16, 0.12, 0.34);
       this.neck.add(eye);
-      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 8), blackMat);
-      pupil.position.set(side * 0.13, 0.085, 0.335);
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.052, 8, 8), blackMat);
+      pupil.position.set(side * 0.16, 0.11, 0.43);
       this.neck.add(pupil);
-      const shine = new THREE.Mesh(new THREE.SphereGeometry(0.014, 6, 6), mat(0xffffff, 0.1, 0));
-      shine.position.set(side * 0.13 + 0.015, 0.11, 0.365);
+      const shine = new THREE.Mesh(new THREE.SphereGeometry(0.02, 6, 6), mat(0xffffff, 0.1, 0));
+      shine.position.set(side * 0.16 + 0.02, 0.15, 0.47);
       this.neck.add(shine);
 
       const ear = new THREE.Group();
