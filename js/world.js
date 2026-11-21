@@ -4,7 +4,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 export const WORLDS = [
   {
     id: "prairie", name: "Prairie Tropicale", icon: "🌴", length: 980,
-    sky: [0x5c94fc, 0x9cd7ff], fog: 0x8ec8ff, fogDensity: 0.0055,
+    sky: [0x5c94fc, 0x5c94fc], fog: 0x8ec8ff, fogDensity: 0.005,
     hemi: [0xbfe4ff, 0x3e7a34, 1.1], dir: [0xfff1cf, 2.6],
     water: { color: 0x1a8fd4, kind: "ocean" },
     top: "grass", side: "soil", deco: ["tree", "bush", "flower", "rock"],
@@ -70,13 +70,43 @@ function mulberry32(seed) {
 
 const texCache = {};
 
+function flatBlock(ctx, s, fill, line, rows = 4, lip = null) {
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, s, s);
+  if (lip) { ctx.fillStyle = lip; ctx.fillRect(0, 0, s, s * 0.16); }
+  ctx.strokeStyle = line;
+  ctx.lineWidth = Math.max(3, s / 70);
+  const step = s / rows;
+  for (let i = 0; i <= rows; i++) {
+    ctx.beginPath(); ctx.moveTo(step * i, 0); ctx.lineTo(step * i, s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, step * i); ctx.lineTo(s, step * i); ctx.stroke();
+  }
+}
+
+function flatBricks(ctx, s, fill, line, rows = 4) {
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, s, s);
+  ctx.strokeStyle = line;
+  ctx.lineWidth = Math.max(3, s / 70);
+  const rh = s / rows;
+  for (let j = 0; j <= rows; j++) {
+    ctx.beginPath(); ctx.moveTo(0, j * rh); ctx.lineTo(s, j * rh); ctx.stroke();
+  }
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < 3; i++) {
+      const x = (j % 2) * (rh / 2) + i * (s / 2);
+      ctx.beginPath(); ctx.moveTo(x, j * rh); ctx.lineTo(x, (j + 1) * rh); ctx.stroke();
+    }
+  }
+}
+
 const BLOCKY = new Set([
   "grass", "soil", "rock", "rockdark", "basalt", "ice", "iceDark",
   "sand", "sandstone", "metal", "metalSide", "lavaSurface",
 ]);
 
 function drawBlockGrid(ctx, size) {
-  ctx.strokeStyle = "rgba(0,0,0,0.20)";
+  ctx.strokeStyle = "rgba(0,0,0,0.10)";
   ctx.lineWidth = 2;
   const step = size / 4;
   for (let i = 0; i <= 4; i++) {
@@ -117,39 +147,21 @@ function noise(ctx, s, base, colors, count, sizeMin, sizeMax) {
 }
 
 function buildTextures() {
-  canvasTex("grass", 256, (c, s) => {
-    noise(c, s, "#4fae3e", ["#5cc24a", "#459c37", "#69d155", "#3f8f33"], 2600, 2, 7);
-    c.strokeStyle = "rgba(120,220,90,0.5)";
-    for (let i = 0; i < 130; i++) {
-      const x = Math.random() * s, y = Math.random() * s;
-      c.beginPath(); c.moveTo(x, y); c.lineTo(x + 2, y - 6); c.stroke();
-    }
-  });
-  canvasTex("soil", 256, (c, s) => noise(c, s, "#7a5230", ["#8a5f3a", "#6b442a", "#94683f", "#5d3a22"], 2000, 2, 9));
-  canvasTex("rock", 256, (c, s) => {
-    noise(c, s, "#8d8f96", ["#9b9da5", "#7d7f88", "#a8aab1", "#6e7076"], 1800, 2, 10);
-    c.strokeStyle = "rgba(60,62,70,0.35)";
-    for (let i = 0; i < 26; i++) {
-      c.beginPath();
-      let x = Math.random() * s, y = Math.random() * s;
-      c.moveTo(x, y);
-      for (let k = 0; k < 5; k++) { x += Math.random() * 30 - 15; y += Math.random() * 22; c.lineTo(x, y); }
-      c.stroke();
-    }
-  });
-  canvasTex("rockdark", 256, (c, s) => noise(c, s, "#65676e", ["#71737a", "#595b62", "#7e8087", "#4c4e55"], 1800, 2, 9));
+  canvasTex("grass", 256, (c, s) => flatBlock(c, s, "#4ecb3c", "#176b1a", 4, "#8bf05e"));
+  canvasTex("soil", 256, (c, s) => flatBricks(c, s, "#c8762d", "#7a3d12", 4));
+  canvasTex("rock", 256, (c, s) => flatBlock(c, s, "#a9adb8", "#5c606c", 4, "#cfd3dd"));
+  canvasTex("rockdark", 256, (c, s) => flatBricks(c, s, "#7c8090", "#4a4d58", 4));
   canvasTex("basalt", 256, (c, s) => {
-    noise(c, s, "#2c2429", ["#372e33", "#221b20", "#3f353b", "#1b1519"], 1900, 2, 9);
-    c.strokeStyle = "rgba(255,90,20,0.85)";
+    flatBlock(c, s, "#3a3036", "#171215", 4);
+    c.strokeStyle = "rgba(255,110,30,0.9)";
     c.lineWidth = 3;
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 10; i++) {
       c.beginPath();
       let x = Math.random() * s, y = Math.random() * s;
       c.moveTo(x, y);
-      for (let k = 0; k < 4; k++) { x += Math.random() * 46 - 23; y += Math.random() * 34; c.lineTo(x, y); }
+      for (let k = 0; k < 3; k++) { x += Math.random() * 40 - 20; y += Math.random() * 30; c.lineTo(x, y); }
       c.stroke();
     }
-    c.lineWidth = 1;
   });
   canvasTex("basaltLava", 256, (c, s) => {
     c.fillStyle = "#000"; c.fillRect(0, 0, s, s);
@@ -162,37 +174,11 @@ function buildTextures() {
       c.stroke();
     }
   });
-  canvasTex("ice", 256, (c, s) => {
-    noise(c, s, "#bfe2ff", ["#d4ecff", "#a8d4f8", "#e6f6ff", "#98c8ee"], 1600, 3, 12);
-    c.strokeStyle = "rgba(255,255,255,0.65)";
-    for (let i = 0; i < 20; i++) {
-      c.beginPath();
-      const y = Math.random() * s;
-      c.moveTo(0, y); c.lineTo(s, y + Math.random() * 30 - 15);
-      c.stroke();
-    }
-  });
-  canvasTex("iceDark", 256, (c, s) => noise(c, s, "#7fb4dd", ["#8fc0e6", "#6ea3cc", "#a2cef0"], 1500, 3, 10));
-  canvasTex("sand", 256, (c, s) => {
-    noise(c, s, "#e3bd77", ["#ecca8a", "#d9b169", "#f4d795", "#cf9f58"], 2400, 2, 8);
-    c.strokeStyle = "rgba(180,140,80,0.35)";
-    for (let i = 0; i < 14; i++) {
-      c.beginPath();
-      const y = Math.random() * s;
-      c.moveTo(0, y); c.bezierCurveTo(s * 0.3, y - 14, s * 0.6, y + 14, s, y);
-      c.stroke();
-    }
-  });
-  canvasTex("sandstone", 256, (c, s) => noise(c, s, "#c69a58", ["#d2a764", "#b98c4c", "#dcb271"], 1700, 2, 9));
-  canvasTex("metal", 256, (c, s) => {
-    noise(c, s, "#2a3040", ["#303849", "#232936", "#384154"], 1200, 3, 8);
-    c.strokeStyle = "rgba(90,110,150,0.5)";
-    c.lineWidth = 2;
-    for (let i = 0; i <= 8; i++) {
-      c.beginPath(); c.moveTo((s / 8) * i, 0); c.lineTo((s / 8) * i, s); c.stroke();
-      c.beginPath(); c.moveTo(0, (s / 8) * i); c.lineTo(s, (s / 8) * i); c.stroke();
-    }
-  });
+  canvasTex("ice", 256, (c, s) => flatBlock(c, s, "#cfeaff", "#5f9ed6", 4, "#f0f9ff"));
+  canvasTex("iceDark", 256, (c, s) => flatBricks(c, s, "#8fc0e6", "#4d7fb0", 4));
+  canvasTex("sand", 256, (c, s) => flatBlock(c, s, "#f0cf7e", "#9a7330", 4, "#ffe9a8"));
+  canvasTex("sandstone", 256, (c, s) => flatBricks(c, s, "#d2a764", "#8a6220", 4));
+  canvasTex("metal", 256, (c, s) => flatBlock(c, s, "#2a3040", "#10131f", 8));
   canvasTex("metalSide", 256, (c, s) => {
     noise(c, s, "#20242e", ["#282e3a", "#191d26", "#2f3644"], 1000, 3, 8);
     c.fillStyle = "#37e6ff";
@@ -639,8 +625,8 @@ export class Level {
   }
 
   _addCoin(x, y, z) {
-    const geo = new THREE.CylinderGeometry(0.42, 0.42, 0.12, 18);
-    const m = new THREE.MeshStandardMaterial({ color: 0xffc93a, emissive: 0xa06a00, emissiveIntensity: 0.65, roughness: 0.25, metalness: 0.85 });
+    const geo = new THREE.CylinderGeometry(0.52, 0.52, 0.14, 18);
+    const m = new THREE.MeshStandardMaterial({ color: 0xffcc33, emissive: 0xd08a00, emissiveIntensity: 0.95, roughness: 0.2, metalness: 0.85 });
     const mesh = new THREE.Mesh(geo, m);
     mesh.rotation.x = Math.PI / 2;
     mesh.position.set(x, y, z);
@@ -714,13 +700,13 @@ export class Level {
   }
 
   _makePipe(zc, groundTop, h) {
-    const bodyMat = mat(0x2fa84f, { rough: 0.3, metal: 0.15 });
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, h, 20), bodyMat);
+    const bodyMat = mat(0x35c24e, { rough: 0.3, metal: 0.15 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, h, 20), bodyMat);
     body.position.set(0, groundTop + h / 2, zc);
     body.castShadow = true;
     body.receiveShadow = true;
     this.group.add(body);
-    const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.36, 20), bodyMat);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 1.02, 0.36, 20), bodyMat);
     rim.position.set(0, groundTop + h - 0.18, zc);
     rim.castShadow = true;
     this.group.add(rim);
